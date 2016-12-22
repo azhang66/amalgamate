@@ -1,0 +1,27 @@
+{
+  "name": "refactored-potato",
+  "version": "0.0.1",
+  "description": "Because the first generation of potato looked like spaghetti.",
+  "scripts": {
+    "start": "npm run build:live",
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:azhang66/refactored-potato.git"
+  },
+  "author": "Albert Zhang",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/azhang66/refactored-potato/issues"
+  },
+  "homepage": "https://github.com/azhang66/refactored-potato#readme",
+  "dependencies": {
+      "typescript": "^2.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.52",
+    "nodemon": "^1.11.0",
+    "ts-node": "^1.7.2"
+  }
+}
