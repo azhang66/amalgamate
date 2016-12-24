@@ -7,12 +7,16 @@
         "type": "node",
         "request": "launch",
         "name": "Launch Program",
-        "program": "${workspaceRoot}\\build:live",
-        "cwd": "${workspaceRoot}"
+        "program": "${workspaceRoot}\\nodemon",
+        "cwd": "${workspaceRoot}",
+        "outFiles": [],
+        "sourceMaps": true
     }, {
         "type": "node",
         "request": "attach",
         "name": "Attach to Process",
-        "port": 5858
+        "port": 5858,
+        "outFiles": [],
+        "sourceMaps": true
     }]
 }

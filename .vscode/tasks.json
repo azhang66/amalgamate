@@ -16,6 +16,9 @@
         "taskName": "test",
         "args": ["run", "test"]
     }, {
+        "taskName": "debug",
+        "args": ["run", "debug"]
+    }, {
         "taskName": "start",
         "args": ["run", "start"],
         "isBuildCommand": true
