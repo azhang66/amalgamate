@@ -1,4 +1,4 @@
 {
-    "exec": "ts-node app.ts",
+    "exec": "ts-node App.ts",
     "ext": "js ts json"
 }
