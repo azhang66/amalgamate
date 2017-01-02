@@ -43,5 +43,5 @@ mysqlPool.getConnection((err, connection) => {
     connection.release();
 });
 
-console.log(`Starting refactored-potato on port ${argv.port}!`);
 app.listen(argv.port);
+console.log(`Starting refactored-potato on port ${argv.port}!`);
