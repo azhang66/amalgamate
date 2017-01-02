@@ -29,7 +29,7 @@ Users.post("/users", (req, res, next) => {
             return;
         }
         const username = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
-        console.log("Adding user ${username}...");
+        console.log(`Adding user ${username}...`);
 
         mysqlPool.query(`INSERT INTO users SET ?`, req.body, (err, rows, fields) => {
             if (err) {
