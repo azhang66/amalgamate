@@ -22,13 +22,14 @@ Users.post("/users", (req, res, next) => {
         }
 
         // Alright. Begin creating user!
-        const alphaLowerFirstName = req.body.first_name.replace(/[^0-9a-z]/gi, "").toLowerCase();
+        const alphaFirstName = req.body.first_name.replace(/[^0-9a-z]/gi, "");
         const alphaLastNameFirstLetter = req.body.last_name.charAt(0).replace(/[^0-9a-z]/gi, "");
-        if (!alphaLowerFirstName || !alphaLastNameFirstLetter) {
+        if (!alphaFirstName || !alphaLastNameFirstLetter) {
             ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
             return;
         }
-        const username = alphaLowerFirstName + alphaLastNameFirstLetter;
+        const username = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
+        console.log("Adding user ${username}...");
 
         mysqlPool.query(`INSERT INTO users SET ?`, req.body, (err, rows, fields) => {
             if (err) {
