@@ -14,7 +14,7 @@ CREATE TABLE users (
 );
 
 CREATE USER 'refactored-potato'@'localhost' IDENTIFIED BY 'secret';
-GRANT ALL PRIVILEGES ON `refactored-potato`.* TO 'refactored-potato'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'refactored-potato'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
 SELECT 'If there are no errors, proceed to ensure the \'mkpasswd\' command exists and that the username format is correct.' AS 'INFO';
