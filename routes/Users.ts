@@ -33,33 +33,29 @@ Users.post("/users", (req, res, next) => {
 });
 
 // READ
-Users.get("/users", (req, res, next) => {
-    mysqlPool.query(`SELECT * FROM users`, (err, rows, fields) => {
-        if (err) {
-            ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
-            return;
-        }
+Users.get("/users", (req, res, next) => mysqlPool.query(`SELECT first_name, last_name, class_period FROM users`, (err, rows, fields) => {
+    if (err) {
+        ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
+        return;
+    }
 
-        res.send({
-            status: "success",
-            data: rows
-        });
+    res.send({
+        status: "success",
+        data: rows
     });
-});
+}));
 
-Users.get("/users/:student_id", (req, res, next) => {
-    mysqlPool.query(`SELECT * FROM users WHERE student_id = ?`, [req.params.student_id], (err, rows, fields) => {
-        if (err) {
-            ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
-            return;
-        }
+Users.get("/users/:student_id", (req, res, next) => mysqlPool.query(`SELECT student_id, first_name, last_name, class_period, date_added FROM users WHERE student_id = ?`, [req.params.student_id], (err, rows, fields) => {
+    if (err) {
+        ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
+        return;
+    }
 
-        res.send({
-            status: "success",
-            data: rows
-        });
+    res.send({
+        status: "success",
+        data: rows
     });
-});
+}));
 
 // UPDATE
 Users.post("/users/:student_id", (req, res, next) => {
