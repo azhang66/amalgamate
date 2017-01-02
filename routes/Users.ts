@@ -2,6 +2,7 @@ import { Router } from "express";
 import { mysqlPool } from "../App";
 import { ServerError } from "../services/ServerError";
 import { ErrorHandler } from "../services/ErrorHandler";
+import { execFile } from "child_process";
 
 export const Users = Router();
 
@@ -15,20 +16,36 @@ Users.post("/users", (req, res, next) => {
 
     req.getValidationResult().then((result) => {
         // Remember to update the length of the required object
-        if (Object.keys(req.body).length === 5 && result.isEmpty()) {
-            mysqlPool.query(`INSERT INTO users SET ?`, req.body, (err, rows, fields) => {
+        if (Object.keys(req.body).length !== 5 || !result.isEmpty()) {
+            ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
+            return;
+        }
+
+        // Alright. Begin creating user!
+        const alphaLowerFirstName = req.body.first_name.replace(/[^0-9a-z]/gi, "").toLowerCase();
+        const alphaLastNameFirstLetter = req.body.last_name.charAt(0).replace(/[^0-9a-z]/gi, "");
+        if (!alphaLowerFirstName || !alphaLastNameFirstLetter) {
+            ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
+            return;
+        }
+        const username = alphaLowerFirstName + alphaLastNameFirstLetter;
+
+        mysqlPool.query(`INSERT INTO users SET ?`, req.body, (err, rows, fields) => {
+            if (err) {
+                ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
+                return;
+            }
+
+            execFile("/usr/bin/mkpasswd", ["-m", "sha-512", req.body.password], (err, stdout, stderr) => {
                 if (err) {
-                    ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
+                    ErrorHandler(new ServerError(err.name.toLowerCase(), err.message, 500), req, res, next);
                     return;
                 }
-
-                res.status(201).send({
-                    status: "success"
+                execFile("/usr/sbin/useradd", ["-m", "-N", "-p", stdout, username], (err, stdout, stderr) => {
+                    res.status(201).send({ status: "success" });
                 });
             });
-        } else {
-            ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
-        }
+        });
     });
 });
 
