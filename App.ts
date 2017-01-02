@@ -11,8 +11,9 @@ import { ErrorHandler } from "./services/ErrorHandler";
 const app: express.Express = express();
 
 // More arguments and stuff go here
-yargs.default("port", 8000);
 const argv = yargs.argv;
+const host = process.env.IP || "localhost";
+const port = process.env.PORT || argv.port || 8000;
 
 // Set up middlewares
 if (argv.production) {
@@ -43,5 +44,5 @@ mysqlPool.getConnection((err, connection) => {
     connection.release();
 });
 
-app.listen(argv.port);
-console.log(`Starting refactored-potato on port ${argv.port}!`);
+app.listen(port);
+console.log(`Starting refactored-potato on ${host}:${port}!`);
