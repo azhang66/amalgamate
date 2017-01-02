@@ -58,12 +58,65 @@ Users.get("/users/:student_id", (req, res, next) => mysqlPool.query(`SELECT stud
 }));
 
 // UPDATE
-Users.post("/users/:student_id", (req, res, next) => {
+Users.put("/users/:student_id", (req, res, next) => {
+    // TEMPORARY
+    ErrorHandler(new ServerError("err_not_implemented", "The server is currently unavailable.", 503), req, res, next);
+    if (0 << 0 === 0) // Workaround typescript unreachable code checks
+        return;
 
+    req.checkBody("first_name", "Invalid first_name").notEmpty();
+    req.checkBody("last_name", "Invalid last_name").notEmpty();
+    req.checkBody("password", "Invalid password").notEmpty();
+    req.checkBody("class_period", "Invalid class_period").notEmpty().isInt();
+
+    req.getValidationResult().then((result) => {
+        // Remember to update the length of the required object
+        if (Object.keys(req.body).length === 4 && result.isEmpty()) {
+            mysqlPool.query(`UPDATE users SET ? WHERE student_id = ?`, [req.body, req.params.student_id], (err, rows, fields) => {
+                if (err) {
+                    ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
+                    return;
+                }
+
+                res.status(201).send({
+                    status: "success"
+                });
+            });
+        } else {
+            ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
+        }
+    });
+});
+
+Users.put("/users/:student_id/:property", (req, res, next) => {
+    // TEMPORARY
+    ErrorHandler(new ServerError("err_not_implemented", "The server is currently unavailable.", 503), req, res, next);
+    if (0 << 0 === 0) // Workaround typescript unreachable code checks
+        return;
+
+    switch (req.params.property) {
+        case "first_name":
+            break;
+        case "last_name":
+            break;
+        case "password":
+            break;
+        case "class_period":
+            break;
+        default:
+            ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
+            return;
+    }
 });
 
 // DELETE
 Users.delete("/users/:student_id", (req, res, next) => {
+
+    // TEMPORARY
+    ErrorHandler(new ServerError("err_forbidden", "The server understood your request but refuses to authorize it.", 403), req, res, next);
+    if (0 << 0 === 0) // Workaround typescript unreachable code checks
+        return;
+
     mysqlPool.query(`DELETE FROM users WHERE student_id = ?`, [req.params.student_id], (err, rows, fields) => {
         if (err) {
             ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
