@@ -42,6 +42,10 @@ Users.post("/users", (req, res, next) => {
                     return;
                 }
                 execFile("/usr/sbin/useradd", ["-m", "-N", "-p", stdout, username], (err, stdout, stderr) => {
+                    if (err) {
+                        ErrorHandler(new ServerError(err.name.toLowerCase(), err.message, 500), req, res, next);
+                        return;
+                    }
                     res.status(201).send({ status: "success" });
                 });
             });
