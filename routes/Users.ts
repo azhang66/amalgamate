@@ -31,7 +31,7 @@ Users.post("/users", (req, res, next) => {
         const username: String = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
         console.log(`Adding user ${username}...`);
 
-        mysqlPool.query("INSERT INTO users SET ?", req.body, (err, rows, fields) => mysqlPool.query("CREATE DATABASE ?", username, (err, rows, fields) => mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?;", [username, req.body.password], (err, rows, fields) => mysqlPool.query("GRANT ALL PRIVILEGES ON ?.* TO ?@'localhost'", [username, username, req.body.password], (err, rows, fields) => {
+        mysqlPool.query("INSERT INTO users SET ?", req.body, (err, rows, fields) => mysqlPool.query("CREATE DATABASE \`${username}\`", (err, rows, fields) => mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?;", [username, req.body.password], (err, rows, fields) => mysqlPool.query("GRANT ALL PRIVILEGES ON \`${username}\`.* TO ?@'localhost'", [username], (err, rows, fields) => mysqlPool.query("FLUSH PRIVILEGES", (err, rows, fields) => {
             if (err) {
                 ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
                 return;
@@ -50,7 +50,7 @@ Users.post("/users", (req, res, next) => {
                     res.status(201).send({ status: "success" });
                 });
             });
-        }))));
+        })))));
     });
 });
 
