@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 export function ErrorHandler(error: any, req: Request, res: Response, next: NextFunction) {
-    if (error.code instanceof String)
+    if (typeof error.code === "string")
         error.code = error.code.toLowerCase();
 
     res.status(error.statusCode || 500);
