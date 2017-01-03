@@ -164,7 +164,7 @@ Users.delete("/users/:student_id", (req, res, next) => {
             }
 
             if (rows.length === 0) {
-                reject("No user found.");
+                reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
                 return;
             }
 
