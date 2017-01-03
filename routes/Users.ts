@@ -157,7 +157,7 @@ Users.delete("/users/:student_id", (req, res, next) => {
 
         let username: String;
 
-        const p = new Promise((resolve, reject) => mysqlPool.query("SELECT first_name, last_name FROM users WHERE student_id = ?", req.body.student_id, (err, rows) => {
+        const p = new Promise((resolve, reject) => mysqlPool.query("SELECT first_name, last_name FROM users WHERE student_id = ?", [req.body.student_id], (err, rows) => {
             if (err) {
                 reject(err);
                 return;
