@@ -142,20 +142,54 @@ Users.put("/users/:student_id/:property", (req, res, next) => {
 
 // DELETE
 Users.delete("/users/:student_id", (req, res, next) => {
+    req.checkParams("student_id", "Please specify a valid student_id").notEmpty().isInt();
+    // req.checkBody("delete_home", "Please specify a valid value for delete_home").notEmpty().isBoolean();
+    // req.checkBody("delete_database", "Please specify a valid value for delete_database").notEmpty().isBoolean();
+    req.checkBody("magic_code", "???").notEmpty().equals("refact");
 
-    // TEMPORARY
-    ErrorHandler(new ServerError("err_forbidden", "The server understood your request but refuses to authorize it.", 403), req, res, next);
-    if (0 << 0 === 0) // Workaround typescript unreachable code checks
-        return;
-
-    mysqlPool.query("DELETE FROM users WHERE student_id = ?", [req.params.student_id], (err) => {
-        if (err) {
-            ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
+    req.getValidationResult().then((result) => {
+        // Remember to update the length of the required object
+        // if (Object.keys(req.body).length !== 3 || !result.isEmpty()) {
+        if (Object.keys(req.body).length !== 1 || !result.isEmpty()) {
+            ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
             return;
         }
 
-        res.send({
-            status: "success"
+        let username: String;
+
+        const p = new Promise((resolve, reject) => mysqlPool.query("SELECT first_name, last_name FROM users WHERE student_id = ?", req.body.student_id, (err, rows) => {
+            if (rows.length === 0) {
+                reject("No user found.");
+                return;
+            }
+
+            const alphaFirstName = rows[0].first_name.replace(/[^0-9a-z]/gi, "");
+            const alphaLastNameFirstLetter = rows[0].last_name.charAt(0).replace(/[^0-9a-z]/gi, "");
+            username = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
+
+            console.log(`Deleting user ${username}...`);
+            if (err) reject(err); else resolve();
+        })).then(() => {
+            return new Promise((resolve, reject) => mysqlPool.query("DELETE FROM users WHERE student_id = ?", [req.params.student_id], (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            return new Promise((resolve, reject) => mysqlPool.query(`DROP DATABASE \`${username}\``, (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            return new Promise((resolve, reject) => mysqlPool.query("DROP USER ?@'localhost' IF EXISTS", [username, req.body.password], (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            return new Promise((resolve, reject) => execFile("/usr/sbin/userdel", ["-r", username], (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            res.status(201).send({ status: "success" });
+        }).catch((err) => {
+            ErrorHandler(err, req, res, next);
+            return;
         });
     });
 });
