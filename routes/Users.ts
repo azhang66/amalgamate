@@ -31,49 +31,37 @@ Users.post("/users", (req, res, next) => {
         const username: String = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
         console.log(`Adding user ${username}...`);
 
-        mysqlPool.query("INSERT INTO users SET ?", req.body, (err, rows, fields) => {
-            if (err) {
-                ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
-                return;
-            }
-            mysqlPool.query(`CREATE DATABASE \`${username}\``, (err, rows, fields) => {
-                if (err) {
-                    ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
-                    return;
-                }
-                mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?;", [username, req.body.password], (err, rows, fields) => {
-                    if (err) {
-                        ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
-                        return;
-                    }
-                    mysqlPool.query(`GRANT ALL PRIVILEGES ON \`${username}\`.* TO ?@'localhost'`, [username], (err, rows, fields) => {
-                        if (err) {
-                            ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
-                            return;
-                        }
-                        mysqlPool.query("FLUSH PRIVILEGES", (err, rows, fields) => {
-                            if (err) {
-                                ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
-                                return;
-                            }
-
-                            execFile("/usr/bin/mkpasswd", ["-m", "sha-512", req.body.password], (err, stdout, stderr) => {
-                                if (err) {
-                                    ErrorHandler(new ServerError(err.name.toLowerCase(), err.message, 500), req, res, next);
-                                    return;
-                                }
-                                execFile("/usr/sbin/useradd", ["-m", "-N", "-p", stdout.replace(/\r?\n|\r/g, ""), username], (err, stdout, stderr) => {
-                                    if (err) {
-                                        ErrorHandler(new ServerError(err.name.toLowerCase(), err.message, 500), req, res, next);
-                                        return;
-                                    }
-                                    res.status(201).send({ status: "success" });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+        let p = new Promise((resolve, reject) => mysqlPool.query("INSERT INTO users SET ?", req.body, (err) => {
+            if (err) reject(err); else resolve();
+        })).then(() => {
+            return new Promise((resolve, reject) => mysqlPool.query(`CREATE DATABASE \`${username}\``, (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            return new Promise((resolve, reject) => mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?;", [username, req.body.password], (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            return new Promise((resolve, reject) => mysqlPool.query(`GRANT ALL PRIVILEGES ON \`${username}\`.* TO ?@'localhost'`, [username], (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            return new Promise((resolve, reject) => mysqlPool.query("FLUSH PRIVILEGES", (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            return new Promise((resolve, reject) => execFile("/usr/bin/mkpasswd", ["-m", "sha-512", req.body.password], (err, stdout) => {
+                if (err) reject(err); else resolve(stdout);
+            }));
+        }).then((stdout: String) => {
+            return new Promise((resolve, reject) => execFile("/usr/sbin/useradd", ["-m", "-N", "-p", stdout.replace(/\r?\n|\r/g, ""), username], (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
+            res.status(201).send({ status: "success" });
+        }).catch((err) => {
+            ErrorHandler(err, req, res, next);
+            return;
         });
     });
 });
