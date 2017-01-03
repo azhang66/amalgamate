@@ -53,8 +53,8 @@ Users.post("/users", (req, res, next) => {
             return new Promise((resolve, reject) => execFile("/usr/bin/mkpasswd", ["-m", "sha-512", req.body.password], (err, stdout) => {
                 if (err) reject(err); else resolve(stdout);
             }));
-        }).then((stdout: String) => {
-            return new Promise((resolve, reject) => execFile("/usr/sbin/useradd", ["-m", "-N", "-p", stdout.replace(/\r?\n|\r/g, ""), username], (err) => {
+        }).then((hashedPW: String) => {
+            return new Promise((resolve, reject) => execFile("/usr/sbin/useradd", ["-m", "-N", "-p", hashedPW.replace(/\r?\n|\r/g, ""), username], (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
