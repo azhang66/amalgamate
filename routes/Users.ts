@@ -192,7 +192,7 @@ Users.delete("/users/:student_id", (req, res, next) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
-            res.status(201).send({ status: "success" });
+            res.status(200).send({ status: "success" });
         }).catch((err) => {
             ErrorHandler(err, req, res, next);
             return;
