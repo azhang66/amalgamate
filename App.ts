@@ -28,6 +28,7 @@ app.use(ErrorHandler);
 
 // Start up services
 export const mysqlPool = mysql.createPool({
+    connectionLimit : 50,
     host: "localhost",
     user: "refactored-potato",
     password: "secret",
