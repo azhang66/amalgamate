@@ -38,7 +38,7 @@ Users.post("/users", (req, res, next) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
-            return new Promise((resolve, reject) => mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?;", [username, req.body.password], (err) => {
+            return new Promise((resolve, reject) => mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?", [username, req.body.password], (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
