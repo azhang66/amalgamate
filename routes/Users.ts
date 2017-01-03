@@ -46,10 +46,6 @@ Users.post("/users", (req, res, next) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
-            return new Promise((resolve, reject) => mysqlPool.query("FLUSH PRIVILEGES", (err) => {
-                if (err) reject(err); else resolve();
-            }));
-        }).then(() => {
             return new Promise((resolve, reject) => execFile("/usr/bin/mkpasswd", ["-m", "sha-512", req.body.password], (err, stdout) => {
                 if (err) reject(err); else resolve(stdout);
             }));
