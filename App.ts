@@ -26,6 +26,12 @@ app.use(expressValidator());
 app.use("/api/v1", Users);
 app.use(ErrorHandler);
 
+app.get(["/", "/index.html"], (req, res, next) => {
+    res.sendFile("/index.html", {
+        root: __dirname
+    });
+});
+
 // Start up services
 export const mysqlPool = mysql.createPool({
     connectionLimit : 50,

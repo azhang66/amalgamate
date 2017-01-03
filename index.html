@@ -1,0 +1,49 @@
+<html>
+
+<head>
+    <title>add stuff</title>
+    <script>
+        function a() {
+            var data = JSON.stringify({
+                "student_id": +document.querySelector("#id").value,
+                "first_name": document.querySelector("#fname").value,
+                "last_name": document.querySelector("#lname").value,
+                "password": document.querySelector("#pw").value,
+                "class_period": +document.querySelector("#cp").value
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener("readystatechange", function () {
+                if (this.readyState === 4) {
+                    console.log(this.responseText);
+                    document.querySelector("#status").innerHTML = this.responseText;
+                }
+            });
+
+            xhr.open("POST", "api/v1/users");
+            xhr.setRequestHeader("content-type", "application/json");
+            xhr.setRequestHeader("cache-control", "no-cache");
+
+            xhr.send(data);
+        }
+
+    </script>
+</head>
+
+<body>
+    <div>Student ID: <input type="number" id="id">
+    </div>
+    <div>First Name: <input id="fname">
+    </div>
+    <div>Last Name: <input id="lname">
+    </div>
+    <div>Your username will be automatically generated.</div>
+    <div>Password: <input type="password" id="pw"> <span style="font-weight: 800">WARNING: DO NOT USE A PASSWORD YOU HAVE USED PREVIOUSLY (for any other purpose)!! PASSWORDS MAY NOT BE STORED SECURELY!?!?!</span></div>
+    <div>Class Period: <input type="number" min="1" max="8" id="cp"></div>
+    <div><input type="submit" onclick="a();"></div>
+    <div id="status"></div>
+</body>
+
+</html>
