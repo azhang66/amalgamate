@@ -184,7 +184,7 @@ Users.delete("/users/:student_id", (req, res, next) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
-            return new Promise((resolve, reject) => mysqlPool.query("DROP USER ?@'localhost' IF EXISTS", [username, req.body.password], (err) => {
+            return new Promise((resolve, reject) => mysqlPool.query("DROP USER ?@'localhost' IF EXISTS", [username], (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
