@@ -1,11 +1,11 @@
 export class ServerError {
-    status: string;
-    details: string;
+    name: string;
+    message: string;
     statusCode: number;
 
-    constructor(status: string, details: string = "Internal Server Error", statusCode: number = 500) {
-        this.status = status;
-        this.details = details;
+    constructor(name: string, message: string = "Internal Server Error", statusCode: number = 500) {
+        this.name = name;
+        this.message = message;
         this.statusCode = statusCode;
     }
 }
