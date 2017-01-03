@@ -158,6 +158,11 @@ Users.delete("/users/:student_id", (req, res, next) => {
         let username: String;
 
         const p = new Promise((resolve, reject) => mysqlPool.query("SELECT first_name, last_name FROM users WHERE student_id = ?", req.body.student_id, (err, rows) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+
             if (rows.length === 0) {
                 reject("No user found.");
                 return;
@@ -168,7 +173,8 @@ Users.delete("/users/:student_id", (req, res, next) => {
             username = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
 
             console.log(`Deleting user ${username}...`);
-            if (err) reject(err); else resolve();
+            resolve();
+            return;
         })).then(() => {
             return new Promise((resolve, reject) => mysqlPool.query("DELETE FROM users WHERE student_id = ?", [req.params.student_id], (err) => {
                 if (err) reject(err); else resolve();
