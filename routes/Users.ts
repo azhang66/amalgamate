@@ -196,7 +196,8 @@ function deleteUser(studentID: number, status: Status, req: Request, res: Respon
     return new Promise((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [studentID], (err, rows) => {
         if (err) return reject(err);
 
-        if (rows.length === 0) {
+        // Only return 404 if the resource was created in the first place. If the account record was never created, just breeze through.
+        if (rows.length === 0 && status > Status.STARTED) {
             return reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
         }
 
