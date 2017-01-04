@@ -53,7 +53,7 @@ Users.post("/users", (req, res, next) => {
                 if (err) reject(err); else resolve(stdout);
             }));
         }).then((hashedPW: String) => {
-            return new Promise((resolve, reject) => execFile("/usr/sbin/useradd", ["-m", "-N", "-p", hashedPW.replace(/\r?\n|\r/g, ""), user.username], (err) => {
+            return new Promise((resolve, reject) => execFile("/usr/sbin/useradd", ["-m", "-N", "-p", hashedPW.replace(/\r?\n|\r/g, ""), "-s", "/bin/bash", user.username], (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
