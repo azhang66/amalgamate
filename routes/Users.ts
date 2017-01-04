@@ -9,7 +9,7 @@ export const Users = Router();
 
 enum Status {
     STARTED,
-    INSERTED_USER,
+    INSERTED_RECORD,
     CREATED_DATABASE,
     CREATED_MYSQL_USER,
     GRANTED_MYSQL_PERMISSIONS,
@@ -49,7 +49,7 @@ Users.post("/users", (req, res, next) => {
 
         new Promise((resolve, reject) => mysqlPool.query("INSERT INTO users SET ?", user, (err) => {
             if (err) return reject(err);
-            status = Status.INSERTED_USER;
+            status = Status.INSERTED_RECORD;
             return resolve();
         })).then(() => {
             return new Promise((resolve, reject) => mysqlPool.query(`CREATE DATABASE \`${user.username}\``, (err) => {
@@ -205,6 +205,7 @@ function deleteUser(studentID: number, status: Status, req: Request, res: Respon
         console.log(`Deleting user ${username}...`);
         resolve();
     })).then(() => {
+        if (status < Status.INSERTED_RECORD) return {};
         return new Promise((resolve, reject) => mysqlPool.query("DELETE FROM users WHERE student_id = ?", [studentID], (err) => {
             if (err) reject(err); else resolve();
         }));
