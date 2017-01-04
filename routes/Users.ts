@@ -197,10 +197,13 @@ function deleteUser(studentID: number, status: Status, req: Request, res: Respon
         if (err) return reject(err);
 
         // Only return 404 if the resource was created in the first place. If the account record was never created, just breeze through.
-        if (rows.length === 0 && status > Status.STARTED) {
-            return reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
+        if (status <= Status.STARTED) {
+            rows = [{}];
         }
 
+        if (rows.length === 0) {
+            return reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
+        }
         username = rows[0].username;
 
         console.log(`Deleting user ${username}...`);
