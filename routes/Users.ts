@@ -2,6 +2,7 @@ import { Router } from "express";
 import { mysqlPool } from "../App";
 import { ServerError } from "../services/ServerError";
 import { ErrorHandler } from "../services/ErrorHandler";
+import { User } from "../services/User";
 import { execFile } from "child_process";
 
 export const Users = Router();
@@ -22,35 +23,37 @@ Users.post("/users", (req, res, next) => {
         }
 
         // Alright. Begin creating user!
+        const user: User = req.body;
+
         const alphaFirstName = req.body.first_name.replace(/[^0-9a-z]/gi, "");
         const alphaLastNameFirstLetter = req.body.last_name.charAt(0).replace(/[^0-9a-z]/gi, "");
         if (!alphaFirstName || !alphaLastNameFirstLetter) {
             ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
             return;
         }
-        const username: String = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
-        console.log(`Adding user ${username}...`);
+        user.username = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
+        console.log(`Adding user ${user.username}...`);
 
-        let p = new Promise((resolve, reject) => mysqlPool.query("INSERT INTO users SET ?", req.body, (err) => {
+        let p = new Promise((resolve, reject) => mysqlPool.query("INSERT INTO users SET ?", user, (err) => {
             if (err) reject(err); else resolve();
         })).then(() => {
-            return new Promise((resolve, reject) => mysqlPool.query(`CREATE DATABASE \`${username}\``, (err) => {
+            return new Promise((resolve, reject) => mysqlPool.query(`CREATE DATABASE \`${user.username}\``, (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
-            return new Promise((resolve, reject) => mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?", [username, req.body.password], (err) => {
+            return new Promise((resolve, reject) => mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?", [user.username, user.password], (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
-            return new Promise((resolve, reject) => mysqlPool.query(`GRANT ALL PRIVILEGES ON \`${username}\`.* TO ?@'localhost'`, [username], (err) => {
+            return new Promise((resolve, reject) => mysqlPool.query(`GRANT ALL PRIVILEGES ON \`${user.username}\`.* TO ?@'localhost'`, [user.username], (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
-            return new Promise((resolve, reject) => execFile("/usr/bin/mkpasswd", ["-m", "sha-512", req.body.password], (err, stdout) => {
+            return new Promise((resolve, reject) => execFile("/usr/bin/mkpasswd", ["-m", "sha-512", user.password], (err, stdout) => {
                 if (err) reject(err); else resolve(stdout);
             }));
         }).then((hashedPW: String) => {
-            return new Promise((resolve, reject) => execFile("/usr/sbin/useradd", ["-m", "-N", "-p", hashedPW.replace(/\r?\n|\r/g, ""), username], (err) => {
+            return new Promise((resolve, reject) => execFile("/usr/sbin/useradd", ["-m", "-N", "-p", hashedPW.replace(/\r?\n|\r/g, ""), user.username], (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
@@ -63,7 +66,7 @@ Users.post("/users", (req, res, next) => {
 });
 
 // READ
-Users.get("/users", (req, res, next) => mysqlPool.query("SELECT first_name, last_name, class_period FROM users", (err, rows) => {
+Users.get("/users", (req, res, next) => mysqlPool.query("SELECT first_name, last_name, username, class_period FROM users", (err, rows) => {
     if (err) {
         ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
         return;
@@ -75,7 +78,7 @@ Users.get("/users", (req, res, next) => mysqlPool.query("SELECT first_name, last
     });
 }));
 
-Users.get("/users/:student_id", (req, res, next) => mysqlPool.query("SELECT student_id, first_name, last_name, class_period, date_added FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
+Users.get("/users/:student_id", (req, res, next) => mysqlPool.query("SELECT student_id, first_name, last_name, username, class_period, date_added FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
     if (err) {
         ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
         return;
@@ -96,12 +99,13 @@ Users.put("/users/:student_id", (req, res, next) => {
 
     req.checkBody("first_name", "Invalid first_name").notEmpty();
     req.checkBody("last_name", "Invalid last_name").notEmpty();
+    req.checkBody("username", "Invalid username").notEmpty();
     req.checkBody("password", "Invalid password").notEmpty();
     req.checkBody("class_period", "Invalid class_period").notEmpty().isInt();
 
     req.getValidationResult().then((result) => {
         // Remember to update the length of the required object
-        if (Object.keys(req.body).length !== 4 || !result.isEmpty()) {
+        if (Object.keys(req.body).length !== 5 || !result.isEmpty()) {
             ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
             return;
         }
@@ -130,6 +134,8 @@ Users.put("/users/:student_id/:property", (req, res, next) => {
             break;
         case "last_name":
             break;
+        case "username":
+            break;
         case "password":
             break;
         case "class_period":
@@ -157,7 +163,7 @@ Users.delete("/users/:student_id", (req, res, next) => {
 
         let username: String;
 
-        const p = new Promise((resolve, reject) => mysqlPool.query("SELECT first_name, last_name FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
+        const p = new Promise((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
             if (err) {
                 reject(err);
                 return;
@@ -168,9 +174,7 @@ Users.delete("/users/:student_id", (req, res, next) => {
                 return;
             }
 
-            const alphaFirstName = rows[0].first_name.replace(/[^0-9a-z]/gi, "");
-            const alphaLastNameFirstLetter = rows[0].last_name.charAt(0).replace(/[^0-9a-z]/gi, "");
-            username = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
+            username = rows[0].username;
 
             console.log(`Deleting user ${username}...`);
             resolve();
