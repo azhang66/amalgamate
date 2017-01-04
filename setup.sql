@@ -7,7 +7,7 @@ CREATE TABLE users (
     student_id INTEGER(6) NOT NULL PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
-    username VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     class_period INTEGER(1) NOT NULL,
     date_added DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
