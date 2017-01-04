@@ -84,12 +84,12 @@ Users.post("/users", (req, res, next) => {
         }).then(() => {
             status = Status.COMPLETE;
             res.status(201).send({ status: "success" });
-            }).catch((err) => {
-                console.log("Bailing out...initializing delete sequence...");
-            deleteUser(req, res, next, status).then(() => {
+        }).catch((err) => {
+            console.log("Bailing out...initializing delete sequence...");
+            deleteUser(user.student_id, status, req, res, next).then(() => {
                 ErrorHandler(err, req, res, next);
             }).catch((err) => {
-                console.log("Bailing out failed...fuck this shit...")
+                console.log("Bailing out failed...fuck this shit...");
                 ErrorHandler(err, req, res, next);
             });
         });
@@ -181,7 +181,7 @@ Users.delete("/users/:student_id", (req, res, next) => {
             return;
         }
 
-        deleteUser(req, res, next, Status.COMPLETE).then(() => {
+        deleteUser(req.params.student_id, Status.COMPLETE, req, res, next).then(() => {
             res.status(200).send({ status: "success" });
         }).catch((err) => {
             ErrorHandler(err, req, res, next);
@@ -190,10 +190,10 @@ Users.delete("/users/:student_id", (req, res, next) => {
     });
 });
 
-function deleteUser(req: Request, res: Response, next: NextFunction, status: Status): Promise<{}> {
+function deleteUser(studentID: number, status: Status, req: Request, res: Response, next: NextFunction): Promise<{}> {
     let username: String;
 
-    return new Promise((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
+    return new Promise((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [studentID], (err, rows) => {
         if (err) return reject(err);
 
         if (rows.length === 0) {
@@ -205,7 +205,7 @@ function deleteUser(req: Request, res: Response, next: NextFunction, status: Sta
         console.log(`Deleting user ${username}...`);
         resolve();
     })).then(() => {
-        return new Promise((resolve, reject) => mysqlPool.query("DELETE FROM users WHERE student_id = ?", [req.params.student_id], (err) => {
+        return new Promise((resolve, reject) => mysqlPool.query("DELETE FROM users WHERE student_id = ?", [studentID], (err) => {
             if (err) reject(err); else resolve();
         }));
     }).then(() => {
