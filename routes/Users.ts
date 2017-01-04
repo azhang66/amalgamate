@@ -84,13 +84,14 @@ Users.post("/users", (req, res, next) => {
         }).then(() => {
             status = Status.COMPLETE;
             res.status(201).send({ status: "success" });
-        }).catch((err) => {
+            }).catch((err) => {
+                console.log("Bailing out...initializing delete sequence...");
             deleteUser(req, res, next, status).then(() => {
                 ErrorHandler(err, req, res, next);
             }).catch((err) => {
+                console.log("Bailing out failed...fuck this shit...")
                 ErrorHandler(err, req, res, next);
             });
-            return;
         });
     });
 });
