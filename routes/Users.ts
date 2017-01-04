@@ -109,17 +109,6 @@ Users.put("/users/:student_id", (req, res, next) => {
             ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
             return;
         }
-
-        mysqlPool.query("UPDATE users SET ? WHERE student_id = ?", [req.body, req.params.student_id], (err, rows, fields) => {
-            if (err) {
-                ErrorHandler(new ServerError(err.code.toLowerCase(), err.message, 500), req, res, next);
-                return;
-            }
-
-            res.status(201).send({
-                status: "success"
-            });
-        });
     });
 });
 
