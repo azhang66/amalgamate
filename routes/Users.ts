@@ -47,39 +47,39 @@ Users.post("/users", (req, res, next) => {
 
         let status: number = Status.STARTED;
 
-        let p = new Promise((resolve, reject) => mysqlPool.query("INSERT INTO users SET ?", user, (err) => {
-            if (err) reject(err);
+        new Promise((resolve, reject) => mysqlPool.query("INSERT INTO users SET ?", user, (err) => {
+            if (err) return reject(err);
             status = Status.INSERTED_USER;
-            resolve();
+            return resolve();
         })).then(() => {
             return new Promise((resolve, reject) => mysqlPool.query(`CREATE DATABASE \`${user.username}\``, (err) => {
-                if (err) reject(err);
+                if (err) return reject(err);
                 status = Status.CREATED_DATABASE;
-                resolve();
+                return resolve();
             }));
         }).then(() => {
             return new Promise((resolve, reject) => mysqlPool.query("CREATE USER ?@'localhost' IDENTIFIED BY ?", [user.username, user.password], (err) => {
-                if (err) reject(err);
+                if (err) return reject(err);
                 status = Status.CREATED_MYSQL_USER;
-                resolve();
+                return resolve();
             }));
         }).then(() => {
             return new Promise((resolve, reject) => mysqlPool.query(`GRANT ALL PRIVILEGES ON \`${user.username}\`.* TO ?@'localhost'`, [user.username], (err) => {
-                if (err) reject(err);
+                if (err) return reject(err);
                 status = Status.GRANTED_MYSQL_PERMISSIONS;
-                resolve();
+                return resolve();
             }));
         }).then(() => {
             return new Promise((resolve, reject) => execFile("/usr/bin/mkpasswd", ["-m", "sha-512", user.password], (err, stdout) => {
-                if (err) reject(err);
+                if (err) return reject(err);
                 status = Status.GENERATED_PASSWORD_HASH;
-                resolve(stdout);
+                return resolve(stdout);
             }));
         }).then((hashedPW: String) => {
             return new Promise((resolve, reject) => execFile("/usr/sbin/useradd", ["-m", "-N", "-p", hashedPW.replace(/\r?\n|\r/g, ""), "-s", "/bin/bash", user.username], (err) => {
-                if (err) reject(err);
+                if (err) return reject(err);
                 status = Status.CREATED_SYSTEM_USER;
-                resolve();
+                return resolve();
             }));
         }).then(() => {
             status = Status.COMPLETE;
@@ -193,21 +193,16 @@ function deleteUser(req: Request, res: Response, next: NextFunction, status: Sta
     let username: String;
 
     return new Promise((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
-        if (err) {
-            reject(err);
-            return;
-        }
+        if (err) return reject(err);
 
         if (rows.length === 0) {
-            reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
-            return;
+            return reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
         }
 
         username = rows[0].username;
 
         console.log(`Deleting user ${username}...`);
         resolve();
-        return;
     })).then(() => {
         return new Promise((resolve, reject) => mysqlPool.query("DELETE FROM users WHERE student_id = ?", [req.params.student_id], (err) => {
             if (err) reject(err); else resolve();
