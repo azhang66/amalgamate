@@ -83,7 +83,7 @@ Users.post("/users", (req, res, next) => {
             }));
         }).then(() => {
             status = Status.COMPLETE;
-            res.status(201).send({ status: "success" });
+            res.status(201).send({ status: "success", username: user.username });
         }).catch((err) => {
             console.log(`Bailing out...initializing delete sequence from status ${Status[status]}`);
             deleteUser(user.student_id, status, req, res, next).then(() => {
