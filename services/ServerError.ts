@@ -1,4 +1,4 @@
-export class ServerError {
+export class ServerError implements Error {
     name: string;
     message: string;
     statusCode: number;
