@@ -85,7 +85,7 @@ Users.post("/users", (req, res, next) => {
             status = Status.COMPLETE;
             res.status(201).send({ status: "success" });
         }).catch((err) => {
-            console.log("Bailing out...initializing delete sequence...");
+            console.log(`Bailing out...initializing delete sequence from status ${Status[status]}`);
             deleteUser(user.student_id, status, req, res, next).then(() => {
                 ErrorHandler(err, req, res, next);
             }).catch((err) => {
