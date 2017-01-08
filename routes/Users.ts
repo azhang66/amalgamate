@@ -43,7 +43,7 @@ Users.post("/users", (req, res, next) => {
             return;
         }
         user.username = (alphaFirstName + alphaLastNameFirstLetter).toLowerCase();
-        console.log(`Adding user ${user.username}...`);
+        console.log(`Creating user ${user.username}...`);
 
         let status: number = Status.STARTED;
 
