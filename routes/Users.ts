@@ -210,7 +210,7 @@ Users.delete("/users/:student_id", (req, res, next) => {
             return;
         }
 
-        new Promise<User>((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
+        new Promise<User>((resolve, reject) => mysqlPool.query("SELECT * FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
             if (err) return reject(err);
 
             if (rows.length === 0) {
