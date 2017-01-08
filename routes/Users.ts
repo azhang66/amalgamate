@@ -175,9 +175,6 @@ Users.delete("/users/:student_id", (req, res, next) => {
 
         deleteUser(req.params.student_id, Status.COMPLETE, req, res, next).then(() => {
             res.status(200).send({ status: "success" });
-        }).catch((err) => {
-            ErrorHandler(err, req, res, next);
-            return;
         });
     });
 });
