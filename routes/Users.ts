@@ -140,6 +140,15 @@ Users.put("/users/:student_id", (req, res, next) => {
         })).then(() => {
             if (oldUser.first_name === newUser.first_name) return undefined;
             return oldUser.changeFirstName(newUser.first_name);
+        }).then(() => {
+            if (oldUser.last_name === newUser.last_name) return undefined;
+            return oldUser.changeLastName(newUser.last_name);
+        }).then(() => {
+            if (oldUser.password === newUser.password) return undefined;
+            return oldUser.changePassword(newUser.password);
+        }).then(() => {
+            if (oldUser.class_period === newUser.class_period) return undefined;
+            return oldUser.changeClassPeriod(newUser.class_period);
         }).catch((err) => {
             console.error(err);
             ErrorHandler(err, req, res, next);
