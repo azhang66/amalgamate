@@ -23,7 +23,7 @@ if (argv.production) {
 }
 app.use(bodyParser.json());
 app.use(expressValidator());
-app.use("/api/v1", Users);
+app.use("/", Users);
 app.use(ErrorHandler);
 
 app.get(["/", "/index.html"], (req, res, next) => {
