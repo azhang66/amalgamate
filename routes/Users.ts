@@ -85,6 +85,7 @@ Users.post("/users", (req, res, next) => {
             status = Status.COMPLETE;
             res.status(201).send({ status: "success", username: user.username });
         }).catch((err) => {
+            console.error(err);
             console.log(`Bailing out...initializing delete sequence from status ${Status[status]}`);
             deleteUser(user.student_id, status, req, res, next).then(() => {
                 ErrorHandler(err, req, res, next);
@@ -219,7 +220,7 @@ function deleteUser(studentID: number, status: Status, req: Request, res: Respon
             if (err && err.name !== "6") reject(err); else resolve();
         }));
     }).catch((err) => {
-        console.log(err);
+        console.error(err);
         ErrorHandler(err, req, res, next);
         return;
     });
