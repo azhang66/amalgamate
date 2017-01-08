@@ -34,7 +34,7 @@ Users.post("/users", (req, res, next) => {
         }
 
         // Alright. Begin creating user!
-        const user: User = req.body;
+        const user = new User(req.body);
 
         const alphaFirstName = req.body.first_name.replace(/[^0-9a-z]/gi, "");
         const alphaLastNameFirstLetter = req.body.last_name.charAt(0).replace(/[^0-9a-z]/gi, "");
@@ -136,7 +136,7 @@ Users.put("/users/:student_id", (req, res, next) => {
         }
 
         let oldUser: User;
-        let newUser: User = req.body;
+        let newUser = new User(req.body);
 
         new Promise((resolve, reject) => mysqlPool.query("SELECT * FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
             if (err) return reject(err);
@@ -145,7 +145,7 @@ Users.put("/users/:student_id", (req, res, next) => {
                 return reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
             }
 
-            oldUser = rows[0];
+            oldUser = new User(rows[0]);
 
             console.log(`Modifying user ${oldUser.username}...`);
             resolve();
@@ -174,7 +174,7 @@ Users.put("/users/:student_id/:property", (req, res, next) => {
         let newProp: any = req.body[req.params.property];
 
         new Promise<void>((resolve, reject) => mysqlPool.query("SELECT * FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
-            oldUser = rows[0];
+            oldUser = new User(rows[0]);
 
             switch (req.params.property) {
                 case "first_name":
