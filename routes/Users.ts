@@ -120,11 +120,6 @@ Users.get("/users/:student_id", (req, res, next) => mysqlPool.query("SELECT stud
 
 // UPDATE
 Users.put("/users/:student_id", (req, res, next) => {
-    // TEMPORARY
-    ErrorHandler(new ServerError("err_not_implemented", "The server is currently unavailable.", 503), req, res, next);
-    if (0 << 0 === 0) // Workaround typescript unreachable code checks
-        return;
-
     req.checkBody("first_name", "Invalid first_name").notEmpty();
     req.checkBody("last_name", "Invalid last_name").notEmpty();
     req.checkBody("username", "Invalid username").notEmpty();
