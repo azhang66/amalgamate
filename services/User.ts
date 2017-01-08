@@ -87,7 +87,7 @@ export class User {
             if (status < UserStatus.CREATED_SYSTEM_USER) return undefined;
             return new Promise<void>((resolve, reject) => execFile("/usr/sbin/userdel", ["-r", this.username], (err) => {
                 // Error code 6 indicates that the specified user does not exist
-                if (err && err.name !== "6") reject(err); else resolve();
+                if (err && (err as any).code !== 6) reject(err); else resolve();
             }));
         });
     }
