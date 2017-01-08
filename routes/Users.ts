@@ -187,13 +187,11 @@ Users.put("/users/:student_id/:property", (req, res, next) => {
                 case "first_name":
                     if (oldUser.first_name === newProp) return undefined; else return oldUser.changeFirstName(newProp);
                 case "last_name":
-                    return undefined;
-                case "username":
-                    return undefined;
+                    if (oldUser.last_name === newProp) return undefined; else return oldUser.changeLastName(newProp);
                 case "password":
-                    return undefined;
+                    if (oldUser.password === newProp) return undefined; else return oldUser.changePassword(newProp);
                 case "class_period":
-                    return undefined;
+                    if (oldUser.class_period === newProp) return undefined; else return oldUser.changeClassPeriod(newProp);
                 default:
                     ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
                     return undefined;
