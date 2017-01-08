@@ -121,6 +121,7 @@ Users.get("/users/:student_id", (req, res, next) => mysqlPool.query("SELECT stud
 
 // UPDATE
 Users.put("/users/:student_id", (req, res, next) => {
+    req.checkParams("student_id", "Invalid student_id").notEmpty().isInt();
     req.checkBody("first_name", "Invalid first_name").notEmpty();
     req.checkBody("last_name", "Invalid last_name").notEmpty();
     req.checkBody("username", "Invalid username").notEmpty();
@@ -133,30 +134,65 @@ Users.put("/users/:student_id", (req, res, next) => {
             ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
             return;
         }
+
+        let oldUser: User;
+        let newUser: User = req.body;
+
+        new Promise((resolve, reject) => mysqlPool.query("SELECT * FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
+            if (err) return reject(err);
+
+            if (rows.length === 0) {
+                return reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
+            }
+
+            oldUser = rows[0];
+
+            console.log(`Modifying user ${oldUser.username}...`);
+            resolve();
+        })).then(() => {
+            if (oldUser.first_name === newUser.first_name) return undefined;
+            return oldUser.changeFirstName(newUser.first_name);
+        }).catch((err) => {
+            console.error(err);
+            ErrorHandler(err, req, res, next);
+            return;
+        });
     });
 });
 
 Users.put("/users/:student_id/:property", (req, res, next) => {
-    // TEMPORARY
-    ErrorHandler(new ServerError("err_not_implemented", "The server is currently unavailable.", 503), req, res, next);
-    if (0 << 0 === 0) // Workaround typescript unreachable code checks
-        return;
+    req.checkParams("student_id", "Invalid student_id").notEmpty().isInt();
+    req.checkBody(req.params.property, `Invalid ${req.params.property}`).notEmpty();
 
-    switch (req.params.property) {
-        case "first_name":
-            break;
-        case "last_name":
-            break;
-        case "username":
-            break;
-        case "password":
-            break;
-        case "class_period":
-            break;
-        default:
+    req.getValidationResult().then((result) => {
+        if (Object.keys(req.body).length !== 1 || !result.isEmpty()) {
             ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
             return;
-    }
+        }
+
+        let oldUser: User;
+        let newProp: any = req.body[req.params.property];
+
+        new Promise<void>((resolve, reject) => mysqlPool.query("SELECT * FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
+            oldUser = rows[0];
+
+            switch (req.params.property) {
+                case "first_name":
+                    if (oldUser.first_name === newProp) return resolve(); else return oldUser.changeFirstName(newProp);
+                case "last_name":
+                    break;
+                case "username":
+                    break;
+                case "password":
+                    break;
+                case "class_period":
+                    break;
+                default:
+                    ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
+                    return;
+            }
+        }));
+    });
 });
 
 // DELETE
