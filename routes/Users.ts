@@ -191,7 +191,13 @@ Users.put("/users/:student_id/:property", (req, res, next) => {
                     ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
                     return;
             }
-        }));
+        })).then(() => {
+            res.send({ status: "success" });
+        }).catch((err) => {
+            console.error(err);
+            ErrorHandler(err, req, res, next);
+            return;
+        });
     });
 });
 
