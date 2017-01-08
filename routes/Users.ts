@@ -220,7 +220,9 @@ Users.delete("/users/:student_id", (req, res, next) => {
             let user = new User(rows[0]);
             console.log(`Deleting user ${user.username}...`);
             resolve(user);
-        })).then((user) => { user.delete(); }).then(() => {
+        })).then((user) => {
+            user.delete();
+        }).then(() => {
             res.status(200).send({ status: "success" });
         }).catch((err) => {
             console.error(err);
