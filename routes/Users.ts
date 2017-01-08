@@ -124,13 +124,12 @@ Users.put("/users/:student_id", (req, res, next) => {
     req.checkParams("student_id", "Invalid student_id").notEmpty().isInt();
     req.checkBody("first_name", "Invalid first_name").notEmpty();
     req.checkBody("last_name", "Invalid last_name").notEmpty();
-    req.checkBody("username", "Invalid username").notEmpty();
     req.checkBody("password", "Invalid password").notEmpty();
     req.checkBody("class_period", "Invalid class_period").notEmpty().isInt();
 
     req.getValidationResult().then((result) => {
         // Remember to update the length of the required object
-        if (Object.keys(req.body).length !== 5 || !result.isEmpty()) {
+        if (Object.keys(req.body).length !== 4 || !result.isEmpty()) {
             ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
             return;
         }
