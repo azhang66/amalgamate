@@ -229,5 +229,9 @@ function deleteUser(studentID: number, status: Status, req: Request, res: Respon
             // Error code 6 indicates that the specified user does not exist
             if (err && err.name !== "6") reject(err); else resolve();
         }));
+    }).catch((err) => {
+        console.log(err);
+        ErrorHandler(err, req, res, next);
+        return;
     });
 }
