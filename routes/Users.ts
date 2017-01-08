@@ -210,19 +210,17 @@ Users.delete("/users/:student_id", (req, res, next) => {
             return;
         }
 
-        let user: User;
-
-        new Promise<void>((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
+        new Promise<User>((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
             if (err) return reject(err);
 
             if (rows.length === 0) {
                 return reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
             }
 
-            user = new User(rows[0]);
+            let user = new User(rows[0]);
             console.log(`Deleting user ${user.username}...`);
             resolve();
-        })).then(() => user.delete).then(() => {
+        })).then((user) => { user.delete(); }).then(() => {
             res.status(200).send({ status: "success" });
         }).catch((err) => {
             console.error(err);
