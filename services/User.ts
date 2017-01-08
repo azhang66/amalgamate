@@ -34,7 +34,7 @@ export class User {
         return new Promise<void>((resolve, reject) => mysqlPool.query("UPDATE users SET password = ? WHERE student_id = ?", [newPassword, this.student_id], (err) => {
             if (err) reject(err); else resolve();
         })).then(() => {
-            return new Promise<void>((resolve, reject) => mysqlPool.query("ALTER USER ? IDENTIFIED BY ?", [this.username, newPassword], (err) => {
+            return new Promise<void>((resolve, reject) => mysqlPool.query("ALTER USER ?@'localhost' IDENTIFIED BY ?", [this.username, newPassword], (err) => {
                 if (err) reject(err); else resolve();
             }));
         }).then(() => {
