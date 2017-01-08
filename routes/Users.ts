@@ -88,9 +88,6 @@ Users.post("/users", (req, res, next) => {
             console.log(`Bailing out...initializing delete sequence from status ${Status[status]}`);
             deleteUser(user.student_id, status, req, res, next).then(() => {
                 ErrorHandler(err, req, res, next);
-            }).catch((err) => {
-                console.log("Bailing out failed...fuck this shit...");
-                ErrorHandler(err, req, res, next);
             });
         });
     });
