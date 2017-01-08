@@ -47,7 +47,7 @@ Users.post("/users", (req, res, next) => {
 
         let status: number = Status.STARTED;
 
-        new Promise((resolve, reject) => mysqlPool.query("INSERT INTO users SET ?", user, (err) => {
+        new Promise<void>((resolve, reject) => mysqlPool.query("INSERT INTO users SET ?", user, (err) => {
             if (err) return reject(err);
             status = Status.INSERTED_RECORD;
             return resolve();
@@ -180,10 +180,10 @@ Users.delete("/users/:student_id", (req, res, next) => {
     });
 });
 
-function deleteUser(studentID: number, status: Status, req: Request, res: Response, next: NextFunction): Promise<{}> {
+function deleteUser(studentID: number, status: Status, req: Request, res: Response, next: NextFunction): Promise<void> {
     let username: String;
 
-    return new Promise((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [studentID], (err, rows) => {
+    return new Promise<void>((resolve, reject) => mysqlPool.query("SELECT username FROM users WHERE student_id = ?", [studentID], (err, rows) => {
         if (err) return reject(err);
 
         // Only return 404 if the resource was created in the first place. If the account record was never created, just breeze through.
@@ -199,22 +199,22 @@ function deleteUser(studentID: number, status: Status, req: Request, res: Respon
         console.log(`Deleting user ${username}...`);
         resolve();
     })).then(() => {
-        if (status < Status.INSERTED_RECORD) return {};
+        if (status < Status.INSERTED_RECORD) return undefined;
         return new Promise((resolve, reject) => mysqlPool.query("DELETE FROM users WHERE student_id = ?", [studentID], (err) => {
             if (err) reject(err); else resolve();
         }));
     }).then(() => {
-        if (status < Status.CREATED_DATABASE) return {};
+        if (status < Status.CREATED_DATABASE) return undefined;
         return new Promise((resolve, reject) => mysqlPool.query(`DROP DATABASE IF EXISTS \`${username}\``, (err) => {
             if (err) reject(err); else resolve();
         }));
     }).then(() => {
-        if (status < Status.CREATED_MYSQL_USER) return {};
+        if (status < Status.CREATED_MYSQL_USER) return undefined;
         return new Promise((resolve, reject) => mysqlPool.query("DROP USER IF EXISTS ?@'localhost'", [username], (err) => {
             if (err) reject(err); else resolve();
         }));
     }).then(() => {
-        if (status < Status.CREATED_SYSTEM_USER) return {};
+        if (status < Status.CREATED_SYSTEM_USER) return undefined;
         return new Promise((resolve, reject) => execFile("/usr/sbin/userdel", ["-r", username], (err) => {
             // Error code 6 indicates that the specified user does not exist
             if (err && err.name !== "6") reject(err); else resolve();
