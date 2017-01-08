@@ -34,6 +34,10 @@ export class User {
         return new Promise<void>((resolve, reject) => mysqlPool.query("UPDATE users SET password = ? WHERE student_id = ?", [newPassword, this.student_id], (err) => {
             if (err) reject(err); else resolve();
         })).then(() => {
+            return new Promise<void>((resolve, reject) => mysqlPool.query("SET PASSWORD FOR ? = PASSWORD(?)", [this.username, newPassword], (err) => {
+                if (err) reject(err); else resolve();
+            }));
+        }).then(() => {
             return new Promise<string>((resolve, reject) => execFile("/usr/bin/mkpasswd", ["-m", "sha-512", newPassword], (err, stdout) => {
                 if (err) return reject(err);
                 return resolve(stdout);
