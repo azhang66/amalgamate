@@ -174,24 +174,32 @@ Users.put("/users/:student_id/:property", (req, res, next) => {
         let newProp: any = req.body[req.params.property];
 
         new Promise<void>((resolve, reject) => mysqlPool.query("SELECT * FROM users WHERE student_id = ?", [req.params.student_id], (err, rows) => {
+            if (err) return reject(err);
+            if (rows.length === 0) {
+                return reject(new ServerError("err_user_not_found", "The requested user does not exist", 404));
+            }
+
             oldUser = new User(rows[0]);
 
+            console.log(`Updating user ${oldUser.username}...`);
+            resolve();
+        })).then(() => {
             switch (req.params.property) {
                 case "first_name":
-                    if (oldUser.first_name === newProp) return resolve(); else return oldUser.changeFirstName(newProp);
+                    if (oldUser.first_name === newProp) return undefined; else return oldUser.changeFirstName(newProp);
                 case "last_name":
-                    break;
+                    return undefined;
                 case "username":
-                    break;
+                    return undefined;
                 case "password":
-                    break;
+                    return undefined;
                 case "class_period":
-                    break;
+                    return undefined;
                 default:
                     ErrorHandler(new ServerError("err_bad_params", "Incorrect supplied parameters", 400), req, res, next);
-                    return;
+                    return undefined;
             }
-        })).then(() => {
+        }).then(() => {
             res.send({ status: "success" });
         }).catch((err) => {
             console.error(err);
