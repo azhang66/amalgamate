@@ -4,7 +4,7 @@ Requires=network.target mysql.service
 After=network.target mysql.service
 
 [Service]
-ExecStart=/usr/bin/node /home/azhang/scorescope-mock-api/server.js
+ExecStart=/usr/bin/ts-node /home/albertz/refactored-potato/App.ts
 Restart=always
 RestartSec=10
 StandardOutput=syslog
