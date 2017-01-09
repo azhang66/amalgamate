@@ -4,7 +4,7 @@ Requires=network.target mysql.service
 After=network.target mysql.service
 
 [Service]
-ExecStart=/usr/bin/ts-node /home/albertz/refactored-potato/App.ts
+ExecStart=/usr/bin/ts-node --project /home/albertz/refactored-potato/tsconfig.json /home/albertz/refactored-potato/App.ts
 Restart=always
 RestartSec=10
 StandardOutput=syslog
